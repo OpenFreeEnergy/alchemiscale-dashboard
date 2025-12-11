@@ -1,0 +1,33 @@
+{
+  "name": "alchemiscale-dashboard",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "eslint"
+  },
+  "dependencies": {
+    "@aws-sdk/client-s3": "^3.934.0",
+    "@aws-sdk/credential-provider-ini": "^3.934.0",
+    "js-yaml": "^4.1.1",
+    "next": "16.0.3",
+    "openchemlib": "^9.18.0",
+    "react": "19.2.0",
+    "react-dom": "19.2.0",
+    "react-json-view-lite": "^2.5.0"
+  },
+  "devDependencies": {
+    "@tailwindcss/postcss": "^4",
+    "@types/js-yaml": "^4.0.9",
+    "@types/node": "^20",
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "eslint": "^9",
+    "eslint-config-next": "16.0.3",
+    "openapi-typescript-codegen": "^0.29.0",
+    "tailwindcss": "^4",
+    "typescript": "^5"
+  }
+}

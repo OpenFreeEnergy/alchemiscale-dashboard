@@ -1,0 +1,9 @@
+/* generated using openapi-typescript-codegen -- do not edit */
+/* istanbul ignore file */
+/* tslint:disable */
+/* eslint-disable */
+export type Body_set_task_restart_patterns_max_retries_networks__network_scoped_key__restartpatterns_maxretries_post = {
+    patterns: Array<string>;
+    max_retries: number;
+};
+
