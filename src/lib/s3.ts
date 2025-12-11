@@ -1,5 +1,4 @@
 import { S3Client, ListObjectsV2Command, GetObjectCommand, _Object } from '@aws-sdk/client-s3';
-import { config } from '@/lib/config';
 
 /**
  * Create a configured S3 client for R2

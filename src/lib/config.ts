@@ -5,7 +5,6 @@
  * All environment variables MUST be provided by the user - no defaults are included.
  */
 
-import { get } from "http";
 
 /**
  * Get the Alchemiscale API base URL from environment variables
