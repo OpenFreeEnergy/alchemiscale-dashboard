@@ -9,23 +9,29 @@ import * as storage from '@/lib/storage';
 import Link from 'next/link';
 
 export default function DashboardPage() {
-  // Initialize state with default values (no localStorage access during SSR)
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [username, setUsername] = useState('');
+  // Initialize state with lazy initialization for SSR-safe localStorage access
+  const [isAuthenticated, setIsAuthenticated] = useState(() => {
+    if (typeof window === 'undefined') return false;
+    const authData = storage.getAuthData();
+    return !!authData;
+  });
+  const [username, setUsername] = useState(() => {
+    if (typeof window === 'undefined') return '';
+    const authData = storage.getAuthData();
+    return authData?.username || '';
+  });
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [isAuthError, setIsAuthError] = useState(false);
 
-  // Configure the client and hydrate auth state on mount (client-side only)
+  // Configure the client and set auth token on mount (client-side only)
   useEffect(() => {
     configureAlchemiscaleClient();
 
-    // Hydrate auth state from localStorage
+    // Set auth token from localStorage
     const authData = storage.getAuthData();
     if (authData) {
       setClientAuthToken(authData.token);
-      setIsAuthenticated(true);
-      setUsername(authData.username || '');
     }
   }, []);
 

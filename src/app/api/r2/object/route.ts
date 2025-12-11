@@ -22,7 +22,7 @@ export async function GET(request: NextRequest) {
     const content = await getObjectAsString(s3Client, bucket, key);
 
     // Parse as YAML if it's a YAML file
-    let parsed: any = null;
+    let parsed: unknown = null;
     if (key.endsWith('.yaml') || key.endsWith('.yml')) {
       try {
         parsed = yaml.load(content);

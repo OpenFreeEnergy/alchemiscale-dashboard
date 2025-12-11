@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import * as storage from '@/lib/storage';
 import type { AuthData } from '@/lib/storage';
 
@@ -7,15 +7,12 @@ import type { AuthData } from '@/lib/storage';
  * Handles SSR by only accessing localStorage on the client side
  */
 export function useAuthData() {
-  const [authData, setAuthData] = useState<AuthData | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
-
-  useEffect(() => {
+  const [authData] = useState<AuthData | null>(() => {
     // Only access localStorage on client side
-    const data = storage.getAuthData();
-    setAuthData(data);
-    setIsLoading(false);
-  }, []);
+    if (typeof window === 'undefined') return null;
+    return storage.getAuthData();
+  });
+  const [isLoading] = useState(false);
 
   return { authData, isLoading };
 }

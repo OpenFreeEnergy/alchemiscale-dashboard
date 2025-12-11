@@ -16,7 +16,7 @@ export default function DebugPage() {
   const [error, setError] = useState('');
   const [isAuthError, setIsAuthError] = useState(false);
   const [r2Prefix, setR2Prefix] = useState<string>('checkpoints/');
-  const [r2Data, setR2Data] = useState<any>(null);
+  const [r2Data, setR2Data] = useState<{ bucket: string; prefix: string; count: number; prefixes: string[] } | null>(null);
   const [r2Loading, setR2Loading] = useState(false);
 
   // Configure the client on mount
@@ -75,7 +75,7 @@ export default function DebugPage() {
   };
 
   // List R2 prefixes
-  const handleListR2Prefixes = async (prefixOverride?: string) => {
+  const handleListR2Prefixes = async () => {
     try {
       setR2Loading(true);
       setError('');
@@ -212,9 +212,7 @@ export default function DebugPage() {
                     <code className="text-sm text-gray-900 dark:text-gray-100">{prefix}</code>
                     <button
                       onClick={() => {
-                        const newPrefix = prefix + '/';
-                        setR2Prefix(newPrefix);
-                        handleListR2Prefixes(newPrefix);
+                        setR2Prefix(prefix + '/');
                       }}
                       className="px-3 py-1 text-sm bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors"
                     >
