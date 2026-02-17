@@ -1,15 +1,16 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { DefaultService } from '@/client';
-import { configureAlchemiscaleClient } from '@/lib/alchemiscale-client';
 import { handleAuthError } from '@/lib/auth-errors';
+import { useAuth } from '@/contexts/AuthContext';
 import { AuthErrorBanner } from '@/components/AuthErrorBanner';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 
 export default function DebugPage() {
   const router = useRouter();
+  const { logout } = useAuth();
   const [pingStatus, setPingStatus] = useState<string>('');
   const [apiInfo, setApiInfo] = useState<Record<string, unknown> | null>(null);
   const [checkStatus, setCheckStatus] = useState<string>('');
@@ -18,11 +19,6 @@ export default function DebugPage() {
   const [r2Prefix, setR2Prefix] = useState<string>('checkpoints/');
   const [r2Data, setR2Data] = useState<{ bucket: string; prefix: string; count: number; prefixes: string[] } | null>(null);
   const [r2Loading, setR2Loading] = useState(false);
-
-  // Configure the client on mount
-  useEffect(() => {
-    configureAlchemiscaleClient();
-  }, []);
 
   // Ping API
   const handlePing = async () => {
@@ -36,6 +32,7 @@ export default function DebugPage() {
       setPingStatus(`Error: ${authError.message}`);
       setError(authError.message);
       setIsAuthError(authError.isAuthError);
+      if (authError.shouldClearAuth) logout();
     }
   };
 
@@ -51,6 +48,7 @@ export default function DebugPage() {
       setError(`Failed to get API info: ${authError.message}`);
       setIsAuthError(authError.isAuthError);
       setApiInfo(null);
+      if (authError.shouldClearAuth) logout();
     }
   };
 
@@ -66,6 +64,7 @@ export default function DebugPage() {
       setCheckStatus(`✗ Service check failed: ${authError.message}`);
       setError(authError.message);
       setIsAuthError(authError.isAuthError);
+      if (authError.shouldClearAuth) logout();
     }
   };
 

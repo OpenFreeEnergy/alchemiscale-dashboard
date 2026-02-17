@@ -11,7 +11,7 @@ Alchemiscale Dashboard is a Next.js 16 + React 19 web interface for the Alchemis
 - `npm run dev` — Start dev server (localhost:3000)
 - `npm run build` — Production build
 - `npm run lint` — ESLint (uses flat config, ignores `src/client/**`)
-- No test framework is currently configured
+- `npm test` — Run unit tests (vitest)
 
 ### Regenerating the API Client
 
@@ -38,12 +38,14 @@ npx openapi-typescript-codegen --input ../devtools/openapi/openapi.json --output
 
 ### Authentication
 
-No React Context or state library. Auth is managed via two mechanisms in parallel:
+Auth state is centralized in a React Context (`src/contexts/AuthContext.tsx`). The `AuthProvider` is wrapped around the app via `src/components/Providers.tsx` (keeping the root layout a server component).
 
-1. **In-memory:** `OpenAPI.TOKEN` (set via `setAuthToken()` from `src/lib/alchemiscale-client.ts`)
-2. **Persistent:** `localStorage` keys `alchemiscale_token` and `alchemiscale_username` (via `src/lib/storage.ts`)
-
-Both must be set/cleared together. The `useAuthenticatedPage` hook restores the in-memory token from localStorage on page mount. `handleAuthError()` in `src/lib/auth-errors.ts` auto-clears both on 401.
+- **`useAuth()`** hook provides `authData`, `isAuthenticated`, `login(token, username)`, and `logout()` to all consumers.
+- **On mount**, the provider calls `configureAlchemiscaleClient()`, restores auth from `localStorage`, and checks the JWT `exp` claim — expired tokens are cleared automatically.
+- **On login**, both `localStorage` and `OpenAPI.TOKEN` are set, and a timeout is scheduled to auto-logout shortly before the JWT expires.
+- **On logout**, both storage locations are cleared and any expiry timer is cancelled.
+- **`useApiData`** automatically detects 401 errors via `isAuthError()` and calls `logout()`, so auth failures propagate reactively to all consumers.
+- **`handleAuthError()`** in `src/lib/auth-errors.ts` is a pure detection/reporting utility — it does NOT clear auth state directly; callers invoke `logout()` when `shouldClearAuth` is true.
 
 ### Data Fetching
 

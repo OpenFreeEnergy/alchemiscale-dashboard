@@ -6,8 +6,6 @@
  */
 
 import { ApiError } from '@/client/core/ApiError';
-import * as storage from '@/lib/storage';
-import { clearAuthToken } from '@/lib/alchemiscale-client';
 
 export interface AuthErrorResult {
   isAuthError: boolean;
@@ -31,10 +29,6 @@ export function isAuthError(error: unknown): boolean {
  */
 export function handleAuthError(error: unknown): AuthErrorResult {
   if (isAuthError(error)) {
-    // Clear auth state when we detect a 401
-    clearAuthToken();
-    storage.clearAuthData();
-
     return {
       isAuthError: true,
       message: 'Your session has expired. Please log in again to continue.',

@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { useParams, useSearchParams, useRouter } from 'next/navigation';
 import { DefaultService } from '@/client';
-import { useAuthenticatedPage } from '@/hooks/useAuthenticatedPage';
+import { useAuth } from '@/contexts/AuthContext';
 import { useApiData } from '@/hooks/useApiData';
 import AuthGate from '@/components/AuthGate';
 import DetailPageLayout from '@/components/DetailPageLayout';
@@ -23,7 +23,7 @@ export default function NetworkDetailPage() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const scopedKey = decodeURIComponent(params.scoped_key as string);
-  const { isAuthenticated } = useAuthenticatedPage();
+  const { isAuthenticated } = useAuth();
 
   // Initialize tab from URL or default to 'status'
   const initialTab = (searchParams.get('tab') as Tab) || 'status';

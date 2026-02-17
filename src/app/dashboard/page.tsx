@@ -1,39 +1,18 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { DefaultService } from '@/client';
-import { configureAlchemiscaleClient, setAuthToken as setClientAuthToken } from '@/lib/alchemiscale-client';
+import { useAuth } from '@/contexts/AuthContext';
 import { handleAuthError } from '@/lib/auth-errors';
 import { AuthErrorBanner } from '@/components/AuthErrorBanner';
-import * as storage from '@/lib/storage';
 import Link from 'next/link';
 
 export default function DashboardPage() {
-  // Initialize state with lazy initialization for SSR-safe localStorage access
-  const [isAuthenticated, setIsAuthenticated] = useState(() => {
-    if (typeof window === 'undefined') return false;
-    const authData = storage.getAuthData();
-    return !!authData;
-  });
-  const [username, setUsername] = useState(() => {
-    if (typeof window === 'undefined') return '';
-    const authData = storage.getAuthData();
-    return authData?.username || '';
-  });
+  const { authData, isAuthenticated, login, logout } = useAuth();
+  const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [isAuthError, setIsAuthError] = useState(false);
-
-  // Configure the client and set auth token on mount (client-side only)
-  useEffect(() => {
-    configureAlchemiscaleClient();
-
-    // Set auth token from localStorage
-    const authData = storage.getAuthData();
-    if (authData) {
-      setClientAuthToken(authData.token);
-    }
-  }, []);
 
   // Handle login
   const handleLogin = async (e: React.FormEvent) => {
@@ -49,13 +28,7 @@ export default function DashboardPage() {
       });
 
       if (tokenResponse.access_token) {
-        setClientAuthToken(tokenResponse.access_token);
-        setIsAuthenticated(true);
-        // Store auth data for persistence
-        storage.setAuthData({
-          token: tokenResponse.access_token,
-          username: username,
-        });
+        login(tokenResponse.access_token, username);
       }
     } catch (err) {
       const authError = handleAuthError(err);
@@ -63,7 +36,7 @@ export default function DashboardPage() {
       setIsAuthError(authError.isAuthError);
 
       if (authError.shouldClearAuth) {
-        setIsAuthenticated(false);
+        logout();
       }
 
       console.error('Login error:', err);
@@ -72,9 +45,7 @@ export default function DashboardPage() {
 
   // Handle logout
   const handleLogout = () => {
-    setClientAuthToken('');
-    setIsAuthenticated(false);
-    storage.clearAuthData();
+    logout();
     setError('');
     setIsAuthError(false);
   };
@@ -129,7 +100,7 @@ export default function DashboardPage() {
           <div className="space-y-6">
             <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
               <div className="flex justify-between items-center mb-6">
-                <h2 className="text-xl font-semibold text-gray-900 dark:text-white">Welcome, {username}!</h2>
+                <h2 className="text-xl font-semibold text-gray-900 dark:text-white">Welcome, {authData?.username}!</h2>
                 <button
                   onClick={handleLogout}
                   className="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 transition-colors"
