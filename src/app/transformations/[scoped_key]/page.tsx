@@ -4,7 +4,7 @@ import { useParams } from 'next/navigation';
 import { JsonView, defaultStyles } from 'react-json-view-lite';
 import 'react-json-view-lite/dist/index.css';
 import { DefaultService } from '@/client';
-import { useAuthenticatedPage } from '@/hooks/useAuthenticatedPage';
+import { useAuth } from '@/contexts/AuthContext';
 import { useApiData } from '@/hooks/useApiData';
 import { convertTupleListToObject, extractPropertyByKeyPattern, extractPropertiesFromMultipleKeys } from '@/lib/dataTransform';
 import AuthGate from '@/components/AuthGate';
@@ -17,7 +17,7 @@ import SmilesViewer from '@/components/SmilesViewer';
 export default function TransformationDetailPage() {
   const params = useParams();
   const scopedKey = decodeURIComponent(params.scoped_key as string);
-  const { isAuthenticated } = useAuthenticatedPage();
+  const { isAuthenticated } = useAuth();
 
   const { data: transformationData, loading, error } = useApiData({
     fetchFn: () => DefaultService.getTransformationTransformationsTransformationScopedKeyGet(scopedKey),

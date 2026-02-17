@@ -1,4 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
+import { isAuthError } from '@/lib/auth-errors';
+import { useAuth } from '@/contexts/AuthContext';
 
 interface UseApiDataOptions<T> {
   fetchFn: () => Promise<T>;
@@ -20,6 +22,7 @@ export function useApiData<T>({
   onSuccess,
   onError,
 }: UseApiDataOptions<T>): UseApiDataReturn<T> {
+  const { logout } = useAuth();
   const [data, setData] = useState<T | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -29,12 +32,14 @@ export function useApiData<T>({
   const fetchFnRef = useRef(fetchFn);
   const onSuccessRef = useRef(onSuccess);
   const onErrorRef = useRef(onError);
+  const logoutRef = useRef(logout);
 
   // Update refs when callbacks change
   useEffect(() => {
     fetchFnRef.current = fetchFn;
     onSuccessRef.current = onSuccess;
     onErrorRef.current = onError;
+    logoutRef.current = logout;
   });
 
   const fetchData = useCallback(async () => {
@@ -49,8 +54,14 @@ export function useApiData<T>({
       onSuccessRef.current?.(result);
       hasFetchedRef.current = true;
     } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Failed to fetch data';
-      setError(errorMessage);
+      // Detect 401 errors and trigger logout via the auth context
+      if (isAuthError(err)) {
+        logoutRef.current();
+        setError('Your session has expired. Please log in again to continue.');
+      } else {
+        const errorMessage = err instanceof Error ? err.message : 'Failed to fetch data';
+        setError(errorMessage);
+      }
       onErrorRef.current?.(err instanceof Error ? err : new Error(String(err)));
       console.error('API error:', err);
     } finally {

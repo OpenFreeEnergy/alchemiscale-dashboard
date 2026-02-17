@@ -2,8 +2,7 @@
 
 import { useState } from 'react';
 import { DefaultService } from '@/client';
-import { useAuthenticatedPage } from '@/hooks/useAuthenticatedPage';
-import { useAuthData } from '@/hooks/useAuthData';
+import { useAuth } from '@/contexts/AuthContext';
 import { useApiData } from '@/hooks/useApiData';
 import Link from 'next/link';
 import AuthGate from '@/components/AuthGate';
@@ -11,8 +10,7 @@ import ResourceList from '@/components/ResourceList';
 import ErrorState from '@/components/ErrorState';
 
 export default function NetworksPage() {
-  const { isAuthenticated } = useAuthenticatedPage();
-  const { authData } = useAuthData();
+  const { isAuthenticated, authData } = useAuth();
   const [org, setOrg] = useState('*');
   const [campaign, setCampaign] = useState('*');
   const [project, setProject] = useState('*');
