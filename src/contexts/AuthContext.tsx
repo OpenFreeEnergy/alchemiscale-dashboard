@@ -32,9 +32,10 @@ function decodeJwtPayload(token: string): Record<string, unknown> | null {
     const parts = token.split('.');
     if (parts.length !== 3) return null;
     const payload = parts[1];
-    // Handle base64url encoding
+    // Handle base64url encoding and add padding
     const base64 = payload.replace(/-/g, '+').replace(/_/g, '/');
-    const json = atob(base64);
+    const padded = base64.padEnd(base64.length + (4 - (base64.length % 4)) % 4, '=');
+    const json = atob(padded);
     return JSON.parse(json);
   } catch {
     return null;
