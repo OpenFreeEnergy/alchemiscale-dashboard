@@ -35,28 +35,34 @@ export default function TransformationTasksTable({ transformation }: Transformat
       );
 
       if (allTasks && Array.isArray(allTasks) && allTasks.length > 0) {
-        // Fetch status for each task
+        // Fetch all task statuses in parallel
+        const results = await Promise.allSettled(
+          allTasks.map((task) =>
+            DefaultService.getTaskStatusTasksTaskScopedKeyStatusGet(task)
+          )
+        );
+
         const tasksWithStatus: Task[] = [];
 
-        for (const task of allTasks) {
-          try {
-            const taskStatus = await DefaultService.getTaskStatusTasksTaskScopedKeyStatusGet(task);
+        for (let i = 0; i < allTasks.length; i++) {
+          const result = results[i];
+          let status: string;
 
-            if (bannedStatuses.has(taskStatus)) {
-              continue
-            }
-
-            tasksWithStatus.push({
-              task,
-              status: taskStatus || 'unknown'
-            });
-          } catch (err) {
-            console.error(`Failed to fetch status for task ${task}:`, err);
-            tasksWithStatus.push({
-              task,
-              status: 'unknown'
-            });
+          if (result.status === 'fulfilled') {
+            status = result.value || 'unknown';
+          } else {
+            console.error(`Failed to fetch status for task ${allTasks[i]}:`, result.reason);
+            status = 'unknown';
           }
+
+          if (bannedStatuses.has(status)) {
+            continue;
+          }
+
+          tasksWithStatus.push({
+            task: allTasks[i],
+            status,
+          });
         }
 
         setTasks(tasksWithStatus);
